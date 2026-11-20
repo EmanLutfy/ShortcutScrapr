@@ -211,6 +211,9 @@ async function resolve(input, { mode = "auto" } = {}) {
           kind: f.kind,
           ext: f.ext,
           name: `${platform}_${stamp}${files.length > 1 ? `_${i + 1}` : ""}.${f.ext}`,
+          // Only present for audio, so the Shortcut can test "has any value"
+          // instead of comparing text (text compare in If breaks across iOS versions).
+          ...(f.kind === "audio" ? { saveToFiles: true } : {}),
         })),
         tried,
       };

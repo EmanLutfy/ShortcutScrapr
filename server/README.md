@@ -48,6 +48,8 @@ On failure: `{ "ok": false, "error": "Link not supported", "code": "unsupported"
 | Facebook | snapsave |
 | X / Twitter | direct, tvd, savetwt, tweeload |
 | YouTube | ytmp3, ytmp3gg (`mode: "audio"`: ytmp3gg) |
+| Threads | threadster |
+| Reddit | rapidsave |
 
 Each link is checked (first byte fetched) before it is returned, so dead or HTML links fall through to the next scraper.
 

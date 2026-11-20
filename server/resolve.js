@@ -13,6 +13,8 @@ const CHAINS = {
   facebook: ["snapsave"],
   twitter: ["direct", "tvd", "savetwt", "tweeload"],
   youtube: ["ytmp3", "ytmp3gg"],
+  threads: ["threadster"],
+  reddit: ["rapidsave"],
 };
 const AUDIO_CHAINS = {
   youtube: ["ytmp3gg"],
@@ -24,6 +26,8 @@ const HOSTS = [
   [/(^|\.)(facebook\.com|fb\.watch|fb\.com)$/, "facebook"],
   [/(^|\.)(x\.com|twitter\.com)$/, "twitter"],
   [/(^|\.)(youtube\.com|youtu\.be)$/, "youtube"],
+  [/(^|\.)threads\.(net|com)$/, "threads"],
+  [/(^|\.)(reddit\.com|redd\.it)$/, "reddit"],
 ];
 
 class ResolveError extends Error {
@@ -173,7 +177,7 @@ async function pickFiles(platform, result, mode) {
     // IG/X carousels list several videos with no quality label; keep them all.
     // Otherwise the list is quality variants of one video; keep the best working one.
     const carousel =
-      (platform === "instagram" || platform === "twitter") &&
+      ["instagram", "twitter", "threads"].includes(platform) &&
       videos.length > 1 &&
       videos.every((v) => !v.quality);
     candidates = videos;
@@ -209,10 +213,12 @@ const PLATFORM_NAMES = {
   facebook: "Facebook",
   twitter: "X",
   youtube: "YouTube",
+  threads: "Threads",
+  reddit: "Reddit",
 };
 
 // Placeholder titles some scrapers return when the post has no caption.
-const GENERIC_TITLES = /^(instagram|facebook|tiktok|twitter|x|youtube)?\s*(media|video|post|photo|image|reel)?$/i;
+const GENERIC_TITLES = /^(instagram|facebook|tiktok|twitter|x|youtube|threads|reddit)?\s*(media|video|post|photo|image|reel)?$/i;
 
 // Caption without hashtags, links, divider lines and line breaks, cut to fit a notification.
 function cleanCaption(title) {

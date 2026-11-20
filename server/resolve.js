@@ -181,14 +181,19 @@ const PLATFORM_NAMES = {
   youtube: "YouTube",
 };
 
-// Caption without hashtags, mentions and line breaks, cut to fit a notification.
+// Placeholder titles some scrapers return when the post has no caption.
+const GENERIC_TITLES = /^(instagram|facebook|tiktok|twitter|x|youtube)?\s*(media|video|post|photo|image|reel)?$/i;
+
+// Caption without hashtags, links, divider lines and line breaks, cut to fit a notification.
 function cleanCaption(title) {
   const s = String(title || "")
-    .replace(/[#@][^\s#@]+/g, "")
+    .replace(/https?:\/\/\S+/g, "")
+    .replace(/#[^\s#@]+/g, "")
+    .replace(/[-–—_=~*.•]{3,}/g, " ")
     .replace(/\s+/g, " ")
-    .replace(/^[\s\-–—|/:.,]+|[\s\-–—|/:.,]+$/g, "")
+    .replace(/^[\s\-–—|/:.,]+|[\s\-–—|/:,]+$/g, "")
     .trim();
-  if (s.length < 3) return "";
+  if (s.length < 3 || GENERIC_TITLES.test(s)) return "";
   return s.length > 80 ? `${s.slice(0, 79).trimEnd()}…` : s;
 }
 

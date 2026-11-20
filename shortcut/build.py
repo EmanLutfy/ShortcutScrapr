@@ -177,7 +177,7 @@ def main():
         "WFWorkflowClientVersion": "2605.0.5",
         "WFWorkflowMinimumClientVersion": 900,
         "WFWorkflowMinimumClientVersionString": "900",
-        "WFWorkflowIcon": {"WFWorkflowIconStartColor": 4282601983, "WFWorkflowIconGlyphNumber": 61440},
+        "WFWorkflowIcon": {"WFWorkflowIconStartColor": 2071128575, "WFWorkflowIconGlyphNumber": 59821},  # violet, repostArrows
         "WFWorkflowTypes": ["ActionExtension"],
         "WFWorkflowInputContentItemClasses": ["WFURLContentItem", "WFStringContentItem"],
         "WFWorkflowHasShortcutInputVariables": True,

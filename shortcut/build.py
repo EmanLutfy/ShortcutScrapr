@@ -145,10 +145,13 @@ def build(server, token):
     add("conditional", GroupingIdentifier=g_kind, WFControlFlowMode=2)
     add("repeat.each", GroupingIdentifier=g_rep, WFControlFlowMode=2)
 
-    a_count = add("getvalueforkey", WFInput=attach(var("Response")), WFDictionaryKey="count",
+    # Notification wording comes from the server, so it can change without reinstalling.
+    a_ntitle = add("getvalueforkey", WFInput=attach(var("Response")), WFDictionaryKey="notifyTitle",
+                   WFGetDictionaryValueType="Value")
+    a_nbody = add("getvalueforkey", WFInput=attach(var("Response")), WFDictionaryKey="notifyBody",
                   WFGetDictionaryValueType="Value")
-    add("notification", WFNotificationActionTitle="Saved",
-        WFNotificationActionBody=text(out(a_count, "Dictionary Value"), " file(s) saved"),
+    add("notification", WFNotificationActionTitle=text(out(a_ntitle, "Dictionary Value")),
+        WFNotificationActionBody=text(out(a_nbody, "Dictionary Value")),
         WFNotificationActionSound=False)
 
     return acts

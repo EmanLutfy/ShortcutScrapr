@@ -173,6 +173,44 @@ async function pickFiles(platform, result, mode) {
   return files.length ? files : null;
 }
 
+const PLATFORM_NAMES = {
+  tiktok: "TikTok",
+  instagram: "Instagram",
+  facebook: "Facebook",
+  twitter: "X",
+  youtube: "YouTube",
+};
+
+// Caption without hashtags, mentions and line breaks, cut to fit a notification.
+function cleanCaption(title) {
+  const s = String(title || "")
+    .replace(/[#@][^\s#@]+/g, "")
+    .replace(/\s+/g, " ")
+    .replace(/^[\s\-–—|/:.,]+|[\s\-–—|/:.,]+$/g, "")
+    .trim();
+  if (s.length < 3) return "";
+  return s.length > 80 ? `${s.slice(0, 79).trimEnd()}…` : s;
+}
+
+// Text for the phone's "saved" notification. Built here so it can change without reinstalling the Shortcut.
+function notification(platform, kind, count, title) {
+  const from = PLATFORM_NAMES[platform] || platform;
+  let notifyTitle;
+  let fallback;
+  if (kind === "audio") {
+    notifyTitle = `🎧 Audio from ${from} saved`;
+    fallback = "It's waiting in your Files.";
+  } else if (kind === "image") {
+    notifyTitle = count > 1 ? `📸 ${count} photos from ${from} saved` : `📸 Photo from ${from} saved`;
+    fallback = "Open Photos to see it.";
+  } else {
+    notifyTitle = count > 1 ? `🎬 ${count} videos from ${from} saved` : `🎬 ${from} video saved`;
+    fallback = "Ready to watch in Photos.";
+  }
+  const caption = cleanCaption(title);
+  return { notifyTitle, notifyBody: caption ? `“${caption}”` : fallback };
+}
+
 async function resolve(input, { mode = "auto" } = {}) {
   const url = extractUrl(input);
   if (!url) throw new ResolveError("bad_url", "No link found", 400);
@@ -199,13 +237,15 @@ async function resolve(input, { mode = "auto" } = {}) {
       tried.push({ scraper: name, ok: true, ms: Date.now() - t0 });
       const kind = files[0].kind;
       const stamp = Date.now();
+      const title = String(res.result.title || "").slice(0, 200);
       return {
         ok: true,
         platform,
         scraper: name,
-        title: String(res.result.title || "").slice(0, 200),
+        title,
         kind,
         count: files.length,
+        ...notification(platform, kind, files.length, title),
         files: files.map((f, i) => ({
           url: f.url,
           kind: f.kind,

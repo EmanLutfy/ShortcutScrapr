@@ -175,11 +175,11 @@ async function pickFiles(platform, result, mode) {
 
 async function resolve(input, { mode = "auto" } = {}) {
   const url = extractUrl(input);
-  if (!url) throw new ResolveError("bad_url", "Tiada link dijumpai", 400);
+  if (!url) throw new ResolveError("bad_url", "No link found", 400);
   const platform = detectPlatform(url);
-  if (!platform) throw new ResolveError("unsupported", "Link tak disokong", 422);
+  if (!platform) throw new ResolveError("unsupported", "Link not supported", 422);
   if (mode === "audio" && !AUDIO_CHAINS[platform]) {
-    throw new ResolveError("unsupported", "Audio sahaja belum disokong untuk platform ni", 422);
+    throw new ResolveError("unsupported", "Audio-only is not supported for this platform yet", 422);
   }
 
   const chain = (mode === "audio" ? AUDIO_CHAINS : CHAINS)[platform];
@@ -222,7 +222,7 @@ async function resolve(input, { mode = "auto" } = {}) {
     }
   }
 
-  const err = new ResolveError("all_failed", "Gagal dapatkan media. Cuba lagi nanti.", 502);
+  const err = new ResolveError("all_failed", "Couldn't get the media. Try again later.", 502);
   err.platform = platform;
   err.tried = tried;
   throw err;

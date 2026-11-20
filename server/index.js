@@ -88,7 +88,7 @@ function readJson(req) {
     req.on("data", (c) => {
       size += c.length;
       if (size > MAX_BODY) {
-        fail(new ResolveError("too_large", "Request terlalu besar", 413));
+        fail(new ResolveError("too_large", "Request too large", 413));
         req.destroy();
       } else chunks.push(c);
     });
@@ -111,13 +111,13 @@ async function handleResolve(req, res) {
   const ip = clientIp(req);
   const user = whoIs(req.headers["x-token"]);
   if (!user) {
-    if (!hit(`ip:${ip}`, 10)) return send(res, 429, { ok: false, error: "Terlalu banyak cubaan" });
-    return send(res, 401, { ok: false, error: "Token salah atau tiada" });
+    if (!hit(`ip:${ip}`, 10)) return send(res, 429, { ok: false, error: "Too many attempts" });
+    return send(res, 401, { ok: false, error: "Wrong or missing token" });
   }
   if (!hit(`user:${user}`, RATE_LIMIT)) {
-    return send(res, 429, { ok: false, error: "Had penggunaan dicapai. Cuba lagi sekejap lagi." });
+    return send(res, 429, { ok: false, error: "Rate limit reached. Try again in a few minutes." });
   }
-  if (active >= MAX_CONCURRENT) return send(res, 503, { ok: false, error: "Server sibuk. Cuba lagi." });
+  if (active >= MAX_CONCURRENT) return send(res, 503, { ok: false, error: "Server busy. Try again." });
 
   active += 1;
   const t0 = Date.now();
@@ -136,7 +136,7 @@ async function handleResolve(req, res) {
     console.log(`${new Date().toISOString()} ${user} ${platform} fail ${status} ${Date.now() - t0}ms ${tried}`);
     send(res, status, {
       ok: false,
-      error: e instanceof ResolveError ? e.message : "Ralat server",
+      error: e instanceof ResolveError ? e.message : "Server error",
       code: e.code || "server_error",
       tried: e.tried,
     });

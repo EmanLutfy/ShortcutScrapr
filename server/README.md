@@ -37,7 +37,7 @@ Without Docker: `npm install --omit=optional && TOKENS=me=<token> node server/in
 }
 ```
 
-On failure: `{ "ok": false, "error": "Link tak disokong", "code": "unsupported" }` with status 400/401/422/429/502/503.
+On failure: `{ "ok": false, "error": "Link not supported", "code": "unsupported" }` with status 400/401/422/429/502/503.
 
 ## Platforms and fallback order
 

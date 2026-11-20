@@ -120,6 +120,36 @@ async function verify(url) {
   }
 }
 
+// Some scrapers wrap the real CDN link in a JWT (dl.snapcdn.app/get?token=...). The iPhone
+// Shortcuts app gets "An error has occurred" from that wrapper for Instagram, while the
+// Instagram/Facebook CDN link inside it works anywhere. Only unwrap those CDNs: TikTok CDN
+// links are often tied to the IP that fetched them.
+const UNWRAP_HOSTS = /(^|\.)(cdninstagram\.com|fbcdn\.net)$/i;
+
+function unwrap(url) {
+  try {
+    const token = new URL(url).searchParams.get("token");
+    const parts = token ? token.split(".") : [];
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+    const inner = new URL(payload.url);
+    return /^https?:$/.test(inner.protocol) && UNWRAP_HOSTS.test(inner.hostname) ? inner.href : null;
+  } catch {
+    return null;
+  }
+}
+
+// Prefer the unwrapped CDN link when it works, else the link as given.
+async function verifyBest(url) {
+  const direct = unwrap(url);
+  if (direct) {
+    const v = await verify(direct);
+    if (v.ok) return { ...v, url: direct };
+  }
+  const v = await verify(url);
+  return v.ok ? { ...v, url } : v;
+}
+
 // Turn a scraper result into the files the iPhone should save, or null if unusable.
 async function pickFiles(platform, result, mode) {
   const all = (result.downloads || [])
@@ -160,15 +190,15 @@ async function pickFiles(platform, result, mode) {
   if (single) {
     const sorted = [...candidates].sort((a, b) => score(b.quality) - score(a.quality));
     for (const c of sorted) {
-      const v = await verify(c.url);
-      if (v.ok) return [{ ...c, ext: extFor(c.kind, v.contentType) }];
+      const v = await verifyBest(c.url);
+      if (v.ok) return [{ ...c, url: v.url, ext: extFor(c.kind, v.contentType) }];
     }
     return null;
   }
 
-  const checks = await Promise.all(candidates.map((c) => verify(c.url)));
+  const checks = await Promise.all(candidates.map((c) => verifyBest(c.url)));
   const files = candidates
-    .map((c, i) => (checks[i].ok ? { ...c, ext: extFor(c.kind, checks[i].contentType) } : null))
+    .map((c, i) => (checks[i].ok ? { ...c, url: checks[i].url, ext: extFor(c.kind, checks[i].contentType) } : null))
     .filter(Boolean);
   return files.length ? files : null;
 }

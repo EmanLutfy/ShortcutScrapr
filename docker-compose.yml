@@ -1,0 +1,16 @@
+services:
+  scrapr-shortcut:
+    build: .
+    container_name: scrapr-shortcut
+    restart: unless-stopped
+    env_file: .env
+    # Default binds to localhost only (put Caddy in front for HTTPS).
+    # For plain HTTP straight from the phone, set BIND=0.0.0.0 in .env.
+    ports:
+      - "${BIND:-127.0.0.1}:${HOST_PORT:-3010}:3000"
+    mem_limit: 256m
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"

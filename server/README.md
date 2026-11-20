@@ -11,6 +11,12 @@ cp .env.example .env    # set TOKENS
 docker compose up -d --build
 ```
 
+With HTTPS (Caddy, free certificate): set `DOMAIN` in `.env`, point its DNS A record at the server, then
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.https.yml up -d --build
+```
+
 Without Docker: `npm install --omit=optional && TOKENS=me=<token> node server/index.js`
 
 ## API

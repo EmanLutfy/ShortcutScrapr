@@ -1,0 +1,24 @@
+# HTTPS with Caddy (free Let's Encrypt cert). Set DOMAIN in .env, point its A record here,
+# open ports 80/443, then:
+#   docker compose -f docker-compose.yml -f docker-compose.https.yml up -d --build
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: scrapr-caddy
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    mem_limit: 128m
+    depends_on:
+      - scrapr-shortcut
+
+volumes:
+  caddy_data:
+  caddy_config:

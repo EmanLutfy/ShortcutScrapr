@@ -3,6 +3,9 @@ FROM node:22-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 
+# tiktok/tikdownloader shells out to curl.
+RUN apk add --no-cache curl
+
 # --omit=optional skips playwright/puppeteer (Chromium uses 300-500 MB RAM).
 COPY package.json ./
 RUN npm install --omit=optional --omit=dev --ignore-scripts --no-audit --no-fund \
